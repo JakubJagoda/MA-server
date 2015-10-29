@@ -1,0 +1,20 @@
+{
+  "name": "ma-server",
+  "version": "0.0.0",
+  "description": "REST API for mobile applications project",
+  "main": "index.js",
+  "author": "Jakub Jagoda",
+  "dependencies": {
+    "babel": "^5.8.29",
+    "bcrypt-nodejs": "0.0.3",
+    "bluebird": "^2.10.2",
+    "hapi": "^11.0.2",
+    "hapi-auth-bearer-token": "git://github.com/JakubJagoda/hapi-auth-bearer-token.git#66f1afd31807a0a2649f0d9a55eec907e4f3999c",
+    "jsonwebtoken": "^5.4.1",
+    "sequelize": "^3.13.0",
+    "sqlite3": "^3.1.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^4.1.3"
+  }
+}
