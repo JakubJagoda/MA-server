@@ -1,4 +1,6 @@
 import models from './../../models/app.models';
+import {InvalidCredentialsError} from './auth.errors';
+
 const Promise = require('bluebird');
 const jwt = require('jsonwebtoken');
 
@@ -10,14 +12,17 @@ export function verifyUsernameAndPassword(name, password) {
         attributes: ['id', 'name', 'passwordHash']
     }).then(user => {
         if (!user) {
-            throw new Error();
+            throw new InvalidCredentialsError();
         }
 
         if (!user.comparePassword(password)) {
-            throw new Error();
+            throw new InvalidCredentialsError();
         }
 
-        return generateToken(user.get('id'))
+        return {
+            token: generateToken(user.get('id')),
+            user: user.get() //TODO: apply some scoping or whatever to remove the passwordHash
+        };
     });
 }
 

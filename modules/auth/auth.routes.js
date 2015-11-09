@@ -1,4 +1,6 @@
 import * as AuthController from './auth.controller';
+import {InvalidCredentialsError} from './auth.errors';
+
 const Promise = require('bluebird');
 
 export default [
@@ -12,12 +14,16 @@ export default [
 
                 Promise.try(() => {
                     return AuthController.verifyUsernameAndPassword(name, password);
-                }).then(token => {
+                }).then(({token, user}) => {
                     reply({
-                        data: { token }
+                        data: {token, user}
                     });
+                }).catch(InvalidCredentialsError, e => {
+                    reply({
+                        error: e.message
+                    }).code(401);
                 }).catch(e => {
-                    reply(e).code(401);
+                    reply(e);
                 });
             }
         }
