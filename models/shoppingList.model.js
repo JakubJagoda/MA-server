@@ -1,5 +1,10 @@
-module.exports = function (sequelize) {
+module.exports = function (sequelize, DataTypes) {
     const ShoppingList = sequelize.define('ShoppingList', {
+        name: {
+            type: DataTypes.STRING,
+            defaultValue: 'Default',
+            allowNull: false
+        }
     }, {
         classMethods: {
             associate: function(models) {

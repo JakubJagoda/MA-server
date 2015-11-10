@@ -1,6 +1,9 @@
 module.exports = function (sequelize, DataTypes) {
     const Product = sequelize.define('Product', {
-        name: DataTypes.STRING
+        name: {
+            type: DataTypes.STRING,
+            allowNull: false
+        }
     }, {
         classMethods: {
             associate: function(models) {

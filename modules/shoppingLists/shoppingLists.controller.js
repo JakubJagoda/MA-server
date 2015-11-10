@@ -10,7 +10,7 @@ export function getUserShoppingLists(userId) {
         include: [{
             model: ShoppingList,
             as: 'shoppingLists',
-            attributes: ['id']
+            attributes: ['id', 'name']
         }]
     }).then(user => {
         return user.get({plain: true}).shoppingLists;
@@ -25,7 +25,7 @@ export function getUserShoppingList(userId, shoppingListId) {
         include: [{
             model: ShoppingList,
             as: 'shoppingLists',
-            attributes: ['id'],
+            attributes: ['id', 'name'],
             where: {
                 id: shoppingListId
             },
