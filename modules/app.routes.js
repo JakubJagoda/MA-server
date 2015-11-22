@@ -1,7 +1,6 @@
 import AuthRoutes from './auth/auth.routes';
 import UserRoutes from './users/users.routes';
 import ShoppingListRoutes from './shoppingLists/shoppingLists.routes';
-import ProductsRoutes from './products/products.routes';
 
 export default [
     {
@@ -15,6 +14,5 @@ export default [
     },
     ...AuthRoutes,
     ...UserRoutes,
-    ...ShoppingListRoutes,
-    ...ProductsRoutes
+    ...ShoppingListRoutes
 ];

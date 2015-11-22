@@ -1,4 +1,4 @@
-module.exports = function (sequelize, DataTypes) {
+export default function (sequelize, DataTypes) {
     const ShoppingList = sequelize.define('ShoppingList', {
         name: {
             type: DataTypes.STRING,
@@ -7,20 +7,8 @@ module.exports = function (sequelize, DataTypes) {
         }
     }, {
         classMethods: {
-            associate: function(models) {
-                ShoppingList.belongsToMany(models.Product, {through: models.ShoppingListItem});
-            }
-        },
-        instanceMethods: {
-            getAllProducts() {
-                const products = this.getDataValue('Products');
-                return products.map(product => {
-                    return {
-                        id: product.id,
-                        name: product.name,
-                        amount: product.ShoppingListItem.amount
-                    };
-                });
+            associate: function (models) {
+                ShoppingList.hasMany(models.ShoppingListItem, {as: 'shoppingListItems'});
             }
         }
     });

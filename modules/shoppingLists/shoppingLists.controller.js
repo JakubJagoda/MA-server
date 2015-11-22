@@ -1,5 +1,5 @@
 import models from './../../models/app.models';
-const {User, ShoppingList, Product, ShoppingListItem} = models;
+const {User, ShoppingList, ShoppingListItem} = models;
 const Promise = require('bluebird');
 
 export function getUserShoppingLists(userId) {
@@ -30,16 +30,13 @@ export function getUserShoppingList(userId, shoppingListId) {
                 id: shoppingListId
             },
             include: [{
-                model: Product,
-                attributes: ['id', 'name']
+                model: ShoppingListItem,
+                as: 'shoppingListItems',
+                attributes: ['id', 'name', 'amount']
             }]
         }]
     }).then(user => {
-        const shoppingList = user.shoppingLists[0];
-        return {
-            id: shoppingList.id,
-            shoppingListItems: shoppingList.getAllProducts()
-        };
+        return user.shoppingLists[0];
     });
 }
 
@@ -51,57 +48,44 @@ export function createShoppingListForUser(userId) {
     }).then(user => user.createShoppingList());
 }
 
-export function addProductToShoppingList(shoppingListId, productId, amount) {
+export function addItemToShoppingList(shoppingListId, name, amount) {
     return Promise.join(
         ShoppingList.findById(shoppingListId),
-        Product.findById(productId),
-        (shoppingList, product) => {
-            return shoppingList.addProduct(product, {amount});
+        ShoppingListItem.create({
+            name,
+            amount
+        }),
+        (shoppingList, item) => {
+            return shoppingList.addShoppingListItem(item)
+                .then(() => item);
         }
     );
 }
 
-export function updateProduct(shoppingListId, productId, newProduct) {
+export function updateItem(shoppingListId, itemId, newItem) {
     return ShoppingListItem.find({
         where: {
-            ShoppingListId: shoppingListId,
-            ProductId: productId
+            id: itemId,
+            ShoppingListId: shoppingListId
         }
-    }).then(shoppingListItem => shoppingListItem.update(newProduct));
+    }).then(shoppingListItem => shoppingListItem.update(newItem));
 }
 
-export function getProduct(shoppingListId, productId) {
-   return Promise.all([
-       ShoppingListItem.find({
-           where: {
-               ShoppingListId: shoppingListId,
-               ProductId: productId
-           },
-           attributes: ['amount']
-       }),
-       Product.find({
-           where: {
-               id: productId
-           },
-           attributes: ['id', 'name']
-       })
-   ]).spread((shoppingListItem, product) => {
-       const plainShoopingListItem = shoppingListItem.get({plain: true});
-       const plainProduct = product.get({plain: true});
-
-       return {
-           id: plainProduct.id,
-           name: plainProduct.name,
-           amount: plainShoopingListItem.amount
-       };
-   });
+export function getItem(shoppingListId, itemId) {
+   return ShoppingListItem.find({
+       where: {
+           id: itemId,
+           ShoppingListId: shoppingListId
+       },
+       attributes: ['name', 'amount']
+   }).then(shoppingListItem => shoppingListItem.get({plain: true}));
 }
 
-export function deleteProduct(shoppingListId, productId) {
+export function deleteItem(shoppingListId, itemId) {
     return ShoppingListItem.destroy({
         where: {
-            ShoppingListId: shoppingListId,
-            ProductId: productId
+            id: itemId,
+            ShoppingListId: shoppingListId
         }
     });
 }

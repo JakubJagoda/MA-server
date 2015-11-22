@@ -1,11 +1,4 @@
-class UserError extends Error {
-    constructor() {
-        super();
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
-
-export class DuplicatedUsernameError extends UserError {
+export class DuplicatedUsernameError extends Error {
     constructor() {
         super();
         this.name = 'DuplicatedUsernameError';

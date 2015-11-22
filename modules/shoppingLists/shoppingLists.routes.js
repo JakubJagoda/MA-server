@@ -51,14 +51,16 @@ export default [
         }
     },
     {
-        path: '/users/{userId}/shopping-lists/{shoppingListId}/products',
+        path: '/users/{userId}/shopping-lists/{shoppingListId}/items',
         method: 'POST',
         config: {
             handler(request, reply) {
                 Promise.try(() => {
-                    return ShoppingListController.addProductToShoppingList(request.params.shoppingListId, request.payload.productId, request.payload.amount)
-                }).then(() => {
-                    reply().code(201);
+                    return ShoppingListController.addItemToShoppingList(request.params.shoppingListId, request.payload.itemName, request.payload.amount)
+                }).then(createdItem => {
+                    reply({
+                        data: createdItem
+                    }).code(201);
                 }).catch(err => {
                     reply(err);
                 });
@@ -67,15 +69,15 @@ export default [
         }
     },
     {
-        path: '/users/{userId}/shopping-lists/{shoppingListId}/products/{productId}',
+        path: '/users/{userId}/shopping-lists/{shoppingListId}/items/{itemId}',
         method: 'GET',
         config: {
             handler(request, reply) {
                 Promise.try(() => {
-                    return ShoppingListController.getProduct(request.params.shoppingListId, request.params.productId)
-                }).then(product => {
+                    return ShoppingListController.getItem(request.params.shoppingListId, request.params.itemId)
+                }).then(item => {
                     reply({
-                        data: product
+                        data: item
                     });
                 }).catch(err => {
                     reply(err);
@@ -85,12 +87,12 @@ export default [
         }
     },
     {
-        path: '/users/{userId}/shopping-lists/{shoppingListId}/products/{productId}',
+        path: '/users/{userId}/shopping-lists/{shoppingListId}/items/{itemId}',
         method: 'PUT',
         config: {
             handler(request, reply) {
                 Promise.try(() => {
-                    return ShoppingListController.updateProduct(request.params.shoppingListId, request.params.productId, request.payload.shoppingListItem)
+                    return ShoppingListController.updateItem(request.params.shoppingListId, request.params.itemId, request.payload.shoppingListItem)
                 }).then(() => {
                     reply().code(201);
                 }).catch(err => {
@@ -101,12 +103,12 @@ export default [
         }
     },
     {
-        path: '/users/{userId}/shopping-lists/{shoppingListId}/products/{productId}',
+        path: '/users/{userId}/shopping-lists/{shoppingListId}/items/{itemId}',
         method: 'DELETE',
         config: {
             handler(request, reply) {
                 Promise.try(() => {
-                    return ShoppingListController.deleteProduct(request.params.shoppingListId, request.params.productId)
+                    return ShoppingListController.deleteItem(request.params.shoppingListId, request.params.itemId)
                 }).then(() => {
                     reply().code(204);
                 }).catch(err => {

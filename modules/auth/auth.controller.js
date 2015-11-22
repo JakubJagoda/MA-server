@@ -12,11 +12,11 @@ export function verifyUsernameAndPassword(name, password) {
         attributes: ['id', 'name', 'passwordHash']
     }).then(user => {
         if (!user) {
-            throw new InvalidCredentialsError();
+            return Promise.reject(new InvalidCredentialsError());
         }
 
         if (!user.comparePassword(password)) {
-            throw new InvalidCredentialsError();
+            return Promise.reject(new InvalidCredentialsError());
         }
 
         return {

@@ -1,11 +1,4 @@
-class AuthError extends Error {
-    constructor() {
-        super();
-        Error.captureStackTrace(this, this.constructor);
-    }
-}
-
-export class InvalidCredentialsError extends AuthError {
+export class InvalidCredentialsError extends Error {
     constructor() {
         super();
         this.name = 'InvalidCredentialsError';
