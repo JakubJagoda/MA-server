@@ -89,3 +89,14 @@ export function deleteItem(shoppingListId, itemId) {
         }
     });
 }
+
+export function overwriteList(shoppingListId, items) {
+    return Promise.all(items.map(item => {
+        return ShoppingListItem.upsert({
+            id: item.id,
+            ShoppingListId: shoppingListId,
+            name: item.name,
+            amount: item.amount
+        });
+    }));
+}

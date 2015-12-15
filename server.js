@@ -10,7 +10,12 @@ const Promise = require('bluebird');
 
 server.connection({
     port: process.env.PORT || 5000,
-    routes: {cors: true}
+    routes: {
+        cors: {
+            origin: ['*'],
+            additionalHeaders: ['X-Device-Id']
+        }
+    }
 });
 
 server.register(require('hapi-auth-bearer-token'), function () {
