@@ -9,6 +9,7 @@ export default function (sequelize, DataTypes) {
         classMethods: {
             associate: function (models) {
                 ShoppingList.hasMany(models.ShoppingListItem, {as: 'shoppingListItems'});
+                ShoppingList.hasOne(ShoppingList, {as: 'ParentShoppingList'});
             }
         }
     });

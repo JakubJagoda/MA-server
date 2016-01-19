@@ -11,6 +11,12 @@ export default function (sequelize, DataTypes) {
         name: DataTypes.STRING,
         amount: {
             type: DataTypes.INTEGER,
+            allowNull: false,
+            defaultValue: 0
+        },
+        rating: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0,
             allowNull: false
         }
     });

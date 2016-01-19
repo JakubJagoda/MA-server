@@ -2,6 +2,8 @@ import * as ShoppingListController from './shoppingLists.controller';
 import * as Sync from './../sync/sync.module';
 import {ShoppingListSyncConflict} from './shoppingLists.errors';
 const Promise = require('bluebird');
+import extractApiVersion from './../apiVersioning/apiVersioning';
+const semver = require('semver');
 
 export default [
     {
@@ -24,9 +26,18 @@ export default [
         path: '/users/{userId}/shopping-lists/{shoppingListId}',
         method: 'GET',
         config: {
+            pre: [
+                {method: extractApiVersion, assign: 'apiVersion'}
+            ],
             handler(request, reply) {
                 Promise.try(() => {
-                    return ShoppingListController.getUserShoppingList(request.params.userId, request.params.shoppingListId);
+                    const shoppingListItemAttributes = ['id', 'name', 'amount'];
+
+                    if (semver.satisfies(request.pre.apiVersion, '>=2.0.0')) {
+                        shoppingListItemAttributes.push(...['rating'])
+                    }
+
+                    return ShoppingListController.getUserShoppingList(request.params.userId, request.params.shoppingListId, shoppingListItemAttributes);
                 }).then(shoppingList => {
                     const meta = {};
                     for (const item of shoppingList.shoppingListItems) {
@@ -40,10 +51,24 @@ export default [
                         }
                     }
 
-                    reply({
-                        data: shoppingList,
-                        meta
-                    });
+                    if (semver.satisfies(request.pre.apiVersion, '>=2.0.0')) {
+                        ShoppingListController.getNestedListsForList(request.params.shoppingListId)
+                            .then(nestedLists => {
+                                const plainShoppingList = shoppingList.get();
+                                plainShoppingList.nestedShoppingLists = nestedLists;
+                                plainShoppingList.parentShoppingList = plainShoppingList.ShoppingListId;
+                                delete plainShoppingList.ShoppingListId;
+                                reply({
+                                    data: plainShoppingList,
+                                    meta
+                                });
+                            });
+                    } else {
+                        reply({
+                            data: shoppingList,
+                            meta
+                        });
+                    }
                 }).catch(e => reply(e));
             },
             auth: 'jwt-user'
@@ -55,14 +80,16 @@ export default [
         config: {
             handler(request, reply) {
                 Promise.try(() => {
-                    return ShoppingListController.createShoppingListForUser(request.params.userId)
-                }).then(() => {
-                    reply().code(201);
+                    return ShoppingListController.createShoppingListForUser(request.params.userId, request.payload.name, request.payload.parentShoppingListId)
+                }).then(createdList => {
+                    reply({
+                        data: createdList
+                    }).code(201);
                 }).catch(err => {
                     reply(err);
                 });
-            },
-            auth: 'jwt-user'
+            }/*,
+            auth: 'jwt-user'*/
         }
     },
     {
@@ -87,9 +114,18 @@ export default [
         path: '/users/{userId}/shopping-lists/{shoppingListId}/items/{itemId}',
         method: 'GET',
         config: {
+            pre: [
+                {method: extractApiVersion, assign: 'apiVersion'}
+            ],
             handler(request, reply) {
                 Promise.try(() => {
-                    return ShoppingListController.getItem(request.params.shoppingListId, request.params.itemId)
+                    const attributes = ['name', 'amount'];
+
+                    if (semver.satisfies(request.pre.apiVersion, '>=2.0.0')) {
+                        attributes.push(...['rating'])
+                    }
+
+                    return ShoppingListController.getItem(request.params.shoppingListId, request.params.itemId, attributes);
                 }).then(item => {
                     reply({
                         data: item

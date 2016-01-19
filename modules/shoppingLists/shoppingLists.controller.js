@@ -10,14 +10,17 @@ export function getUserShoppingLists(userId) {
         include: [{
             model: ShoppingList,
             as: 'shoppingLists',
-            attributes: ['id', 'name']
+            attributes: ['id', 'name'],
+            where: {
+                ShoppingListId: null
+            }
         }]
     }).then(user => {
         return user.get({plain: true}).shoppingLists;
     });
 }
 
-export function getUserShoppingList(userId, shoppingListId) {
+export function getUserShoppingList(userId, shoppingListId, shoppingListItemAttributes) {
     return User.find({
         where: {
             id: userId
@@ -25,14 +28,14 @@ export function getUserShoppingList(userId, shoppingListId) {
         include: [{
             model: ShoppingList,
             as: 'shoppingLists',
-            attributes: ['id', 'name'],
+            attributes: ['id', 'name', 'ShoppingListId'],
             where: {
                 id: shoppingListId
             },
             include: [{
                 model: ShoppingListItem,
                 as: 'shoppingListItems',
-                attributes: ['id', 'name', 'amount']
+                attributes: shoppingListItemAttributes
             }]
         }]
     }).then(user => {
@@ -40,12 +43,27 @@ export function getUserShoppingList(userId, shoppingListId) {
     });
 }
 
-export function createShoppingListForUser(userId) {
+export function createShoppingListForUser(userId, shoppingListName, parentShoppingListId = null) {
     return User.find({
         where: {
             id: userId
         }
-    }).then(user => user.createShoppingList());
+    }).then(user => user.createShoppingList({
+        name: shoppingListName
+    })).then(newShoppingList => {
+        if (!parentShoppingListId) {
+            return newShoppingList;
+        }
+
+        return ShoppingList.find({
+            where: {
+                id: parentShoppingListId
+            }
+        }).then(parentShoppingList => {
+            newShoppingList.set('ShoppingListId', parentShoppingList.get('id'));
+            return newShoppingList.save();
+        });
+    });
 }
 
 export function addItemToShoppingList(shoppingListId, name, amount) {
@@ -71,13 +89,13 @@ export function updateItem(shoppingListId, itemId, newItem) {
     }).then(shoppingListItem => shoppingListItem.update(newItem));
 }
 
-export function getItem(shoppingListId, itemId) {
+export function getItem(shoppingListId, itemId, attributes) {
    return ShoppingListItem.find({
        where: {
            id: itemId,
            ShoppingListId: shoppingListId
        },
-       attributes: ['name', 'amount']
+       attributes
    }).then(shoppingListItem => shoppingListItem.get({plain: true}));
 }
 
@@ -96,7 +114,19 @@ export function overwriteList(shoppingListId, items) {
             id: item.id,
             ShoppingListId: shoppingListId,
             name: item.name,
-            amount: item.amount
+            amount: item.amount,
+            rating: item.rating || 0
         });
     }));
+}
+
+export function getNestedListsForList(shoppingListId) {
+    return ShoppingList.findAll({
+        where: {
+            ShoppingListId: shoppingListId
+        },
+        attributes: ['id', 'name']
+    }).then(nestedLists => {
+        return nestedLists.map(nestedList => nestedList.get({plain: true}));
+    });
 }
