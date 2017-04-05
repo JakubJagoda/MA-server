@@ -148,7 +148,7 @@ export default [
                     const meta = request.payload.meta;
 
                     for (const item of items) {
-                        const subtotal = meta[item.id].subtotal;
+                        const subtotal = (meta[item.id] && meta[item.id].subtotal) || item.amount;
                         Sync.setSubtotal(item.id, deviceId, subtotal);
                         item.amount = Sync.getOverall(item.id);
                     }
